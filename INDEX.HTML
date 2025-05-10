@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DSNLU GPA Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 min-h-screen flex items-center justify-center p-4">
+  <div class="container bg-white rounded-2xl shadow-2xl p-10 max-w-3xl w-full">
+    
+    <!-- Header with Logo -->
+    <div class="flex items-center justify-center mb-6">
+      <img src="https://gumlet.assettype.com/barandbench/2021-12/b67efba4-8414-40f1-a31b-d352a7ade166/36.jpg?auto=format%2Ccompress&fit=max" alt="DSNLU Logo" class="h-20 w-25 mr-3 rounded-full shadow-md">
+      <h1 class="text-4xl font-extrabold text-gray-800">DSNLU GPA Calculator</h1>
+    </div>
+
+    <!-- Year & Semester Selection -->
+    <div class="mb-6">
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">Select Year and Semester</h2>
+
+      <label for="year" class="block text-lg text-gray-600">Select Year:</label>
+      <select id="year" class="p-3 w-full rounded-lg border border-gray-300 mb-4" onchange="populateSemesters()">
+        <option value="">-- Select Year --</option>
+        <option value="1">1st Year</option>
+        <option value="2">2nd Year</option>
+        <option value="3">3rd Year</option>
+        <option value="4">4th Year</option>
+        <option value="5">5th Year</option>
+      </select>
+
+      <label for="semester" class="block text-lg text-gray-600">Select Semester:</label>
+      <select id="semester" class="p-3 w-full rounded-lg border border-gray-300" onchange="updateGPAInputs()">
+        <option value="">-- Select Semester --</option>
+      </select>
+    </div>
+
+    <!-- GPA Inputs -->
+    <div class="mb-6">
+      <h2 class="text-2xl font-semibold text-gray-700 mb-2">Enter Grades</h2>
+      <form id="gpa-form">
+        <div id="gpa-inputs"></div>
+        <button type="button" onclick="calculateGPA()" class="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all">Calculate GPA</button>
+      </form>
+      <div class="mt-4 text-xl font-bold text-center text-green-700" id="gpa-result"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center text-sm text-gray-600 mt-6">
+      Made by <span class="text-red-600 font-semibold">Jaswanth Adari</span> (DSNLU'29)
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+const subjectsPerSemester = {
+  1: [
+    ['Political Science – I', 3],
+    ['Sociology – I', 3],
+    ['History – I', 3],
+    ['Law of Torts, Motor Vehicle Act and Consumer Protection Act', 4],
+    ['Legal Methods & Moot Court', 4]
+  ],
+  2: [
+    ['Legal Language and Legal Writing', 4],
+    ['Political Science – II', 3],
+    ['Sociology – II', 3],
+    ['Legal And Constitutional History', 3],
+    ['Economics – I', 3],
+    ['Law of Contracts – I and Specific Relief Act', 4]
+  ],
+  3: [
+    ['Criminal Law I (IPC – I)', 4],
+    ['Family Law – I', 4],
+    ['Constitutional Law – I', 4],
+    ['Economics – II', 3],
+    ['Jurisprudence', 4],
+    ['Specific Contracts (Contracts – II)', 4]
+  ],
+  4: [
+    ['Criminal Law – II (IPC – II)', 4],
+    ['Family Law – II', 4],
+    ['Constitutional Law – II', 4],
+    ['Code of Criminal Procedure', 4],
+    ['Law and Poverty', 4],
+    ['Transfer of Property', 4]
+  ],
+  5: [
+    ['Labour Law – I', 4],
+    ['Law of Evidence', 4],
+    ['Code of Civil Procedure', 4],
+    ['Environmental Law', 4],
+    ['Intellectual Property Rights', 4],
+    ['Public International Law', 4]
+  ],
+  6: [
+    ['Labour Law – II', 4],
+    ['Administrative Law', 4],
+    ['Interpretation of Statutes', 4],
+    ['Tax Law – I', 4],
+    ['Law of Banking and Negotiable Instruments', 4],
+    ['Clinical Paper I – ADR', 4]
+  ],
+  7: [
+    ['Tax Law – II', 4],
+    ['Clinical Paper II – Drafting, Pleading and Conveyancing', 4],
+    ['Corporate Law – I', 4],
+    ['Clinical Paper III – Law of Mediation', 4],
+    ['Elective – I: Health Laws / Air and Space Laws', 4],
+    ['Elective – II: International Trade Law / Natural Resources and Energy Laws', 4]
+  ],
+  8: [
+    ['Corporate Law – II', 4],
+    ['Competition Law', 4],
+    ['Private International Law', 4],
+    ['Elective – III: IHL / International Dispute Settlement & Law', 4],
+    ['Elective – IV: Criminology / Investment Law', 4],
+    ['Elective – V: Insurance Laws / Biotechnology & Law', 4]
+  ],
+  9: [
+    ['Land Laws', 4],
+    ['Information Technology Law', 4],
+    ['Elective – VI: Maritime Law / Citizenship and Immigration Laws', 4],
+    ['Elective – VII: Forensic Science & Law / Corporate Governance', 4],
+    ['Seminar Paper – I: Media Laws / Election Laws / Affirmative Action', 2],
+    ['Seminar Paper – II: Refugee Laws / Drug Control Laws / Law of Carriage', 2]
+  ],
+  10: [
+    ['Clinical Paper IV – Legal and Professional Ethics', 4],
+    ['Elective – VIII: International Environmental Law / Women and Child Law', 4],
+    ['Elective – IX: Insolvency Laws / International Criminal Law', 4],
+    ['Elective – X: Sports Laws / Infrastructure Laws', 4],
+    ['Seminar Paper – III: War Crimes / RTI / Comparative Constitution', 2],
+    ['Seminar Paper – IV: Military Law / Mining Laws / Comparative CrPC', 2]
+  ]
+};
+
+
+    function populateSemesters() {
+      const year = parseInt(document.getElementById('year').value);
+      const semesterSelect = document.getElementById('semester');
+      semesterSelect.innerHTML = '<option value="">-- Select Semester --</option>';
+      if (year) {
+        const start = (year - 1) * 2 + 1;
+        const end = start + 1;
+        for (let i = start; i <= end; i++) {
+          const option = document.createElement('option');
+          option.value = i;
+          option.text = `Semester ${i}`;
+          semesterSelect.appendChild(option);
+        }
+      }
+      updateGPAInputs();
+    }
+
+    function updateGPAInputs() {
+      const sem = parseInt(document.getElementById('semester').value);
+      const container = document.getElementById('gpa-inputs');
+      container.innerHTML = '';
+
+      if (!subjectsPerSemester[sem]) return;
+
+      subjectsPerSemester[sem].forEach(([subject]) => {
+        const wrapper = document.createElement('div');
+        wrapper.classList.add('mb-4');
+
+        const label = document.createElement('label');
+        label.className = 'block text-md text-gray-700 mb-1';
+        label.innerText = `${subject} Grade:`;
+
+        const select = document.createElement('select');
+        select.className = 'gpa-grade p-3 w-full rounded-lg border border-gray-300';
+        ['Select Grade', 'O (10)', 'A+ (9.5)', 'A (9)', 'B+ (8.5)', 'B (8)', 'C (7.5)', 'P (7)', 'F (0)'].forEach((grade, i) => {
+          const opt = document.createElement('option');
+          opt.value = i === 0 ? '' : 10 - (i - 1) * 0.5;
+          opt.text = grade;
+          select.appendChild(opt);
+        });
+
+        wrapper.appendChild(label);
+        wrapper.appendChild(select);
+        container.appendChild(wrapper);
+      });
+    }
+
+function calculateGPA() {
+  const sem = parseInt(document.getElementById('semester').value);
+  const grades = document.querySelectorAll('.gpa-grade');
+  let totalPoints = 0;
+  let totalCredits = 0;
+
+  if (!subjectsPerSemester[sem]) return;
+
+  subjectsPerSemester[sem].forEach(([subject, credit], index) => {
+    const grade = parseFloat(grades[index].value);
+    if (!isNaN(grade)) {
+      totalPoints += credit * grade;
+      totalCredits += credit;
+    }
+  });
+
+  const gpa = totalCredits ? (totalPoints / totalCredits).toFixed(2) : 'N/A';
+  document.getElementById('gpa-result').innerText = `Your GPA is: ${gpa}`;
+}
+
+  </script>
+</body>
+</html>
